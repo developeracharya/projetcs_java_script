@@ -83,3 +83,9 @@ td{
     background-color: #fff ;
     color: #27374D;
 }
+.odd-row{
+    background-color: #ECE5C7;
+}
+.even-row{
+    background-color: #FCE9F1;
+}
