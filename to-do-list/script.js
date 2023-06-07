@@ -29,7 +29,8 @@ const renderData = (datas) => {
         // console.log(i, "even");
         rowClass = "even-row";
       }
-      templete += `
+      if (!data.finished) {
+        templete += `
       <tr class = "${rowClass}" id="row-${i}">
       <td class="number" id= "number-${i}">${i}.</td>
       <td class="text" id= "text-${i}">${data.text}</td>
@@ -41,7 +42,24 @@ const renderData = (datas) => {
       </td>
       </tr>
       `;
-      i++;
+        i++;
+      } else {
+        console.log(true);
+        templete += `
+       
+        <tr class = "${rowClass}" id="row-${i}">
+        <td class="number" id= "number-${i}"><s>${i}.</s></td>
+        <td class="text" id= "text-${i}"><s>${data.text}</s></td>
+        <td class="date" id= "date-${i}"><s>${data.date}</s></td>
+        <td>
+        <button class="edit-btn" id= "edit-btn-${i}">Edit</button>
+        <button class="finished-btn" id= "finished-btn-${i}">Finished</button>
+        <button class="delete-btn" id= "delete-btn-${i}">Delete</button>
+        </td>
+        </tr>
+        `;
+          i++;
+      }
     }
   }
   tableContainer.innerHTML = templete;
@@ -72,7 +90,7 @@ function dataArray(text, date) {
     localData = localData.concat(dataFromLocalStorage);
     console.log(localData);
   }
-  localData.push({ text: text, date: date });
+  localData.push({ text: text, date: date, finished: false });
 
   globalData = globalData.concat(localData);
   // console.log(globalData);
@@ -99,7 +117,7 @@ for (let btn of deleteBtn) {
     console.log(event);
     let index = parseInt(event.target.id.slice(11));
     // console.log(index);
-    let localStorageData = JSON.parse(localStorage.getItem('data'));
+    let localStorageData = JSON.parse(localStorage.getItem("data"));
     // console.log(localStorageData[index - 1]);
     let deleteData = localStorageData.splice(index - 1, 1);
     console.log(deleteData);
@@ -108,17 +126,39 @@ for (let btn of deleteBtn) {
     console.log(localStorageData);
     renderData(localStorageData);
   });
-  
 }
-for(let btn of finishedBtn){
+for (let btn of finishedBtn) {
   btn.addEventListener("click", (event) => {
     let index = parseInt(event.target.id.slice(13));
+    let localStorageData = JSON.parse(localStorage.getItem("data"));
+    localStorageData[index - 1].finished = true;
+    localStorage.setItem("data", JSON.stringify(localStorageData));
     console.log(index);
-    let rowId = `row-${index}`
-    console.log(typeof rowId);
-    const tdEl = document.getElementById(rowId);
-    console.log(tdEl);
-    tdEl.style.textDecoration = "line-through";
-  })
+    let numberEl = document.getElementById(`number-${index}`);
+    let textEl = document.getElementById(`text-${index}`);
+    let dateEl = document.getElementById(`date-${index}`);
+    // console.log(typeof rowId);
+    // console.log(tdEl);
+    numberEl.style.textDecoration = "line-through";
+    textEl.style.textDecoration = "line-through";
+    dateEl.style.textDecoration = "line-through";
+  });
+}
 
+for (let btn of editBtn) {
+  btn.addEventListener("click", (event) => {
+    let index = parseInt(event.target.id.slice(9));
+    let localStorageData = JSON.parse(localStorage.getItem("data"));
+    textEl.value = localStorageData[index - 1].text;
+    dateEl.value =  localStorageData[index - 1].date;
+    localStorageData.splice(index - 1, 1);
+    localStorage.setItem("data", JSON.stringify(localStorageData));
+    console.log(localStorageData);
+    renderData(localStorageData);
+    addBtn.addEventListener('click', () => {
+      dataArray(textEl.value, dateEl.value);
+      let localStorageData = JSON.parse(localStorage.getItem("data"));
+      renderData(localStorageData);
+    })
+  })
 }
