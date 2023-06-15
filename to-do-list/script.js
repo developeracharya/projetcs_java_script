@@ -31,14 +31,14 @@ const renderData = (datas) => {
       }
       if (!data.finished) {
         templete += `
-      <tr class = "${rowClass}" id="row-${i}">
-      <td class="number" id= "number-${i}">${i}.</td>
-      <td class="text" id= "text-${i}">${data.text}</td>
-      <td class="date" id= "date-${i}">${data.date}</td>
+      <tr class = "${rowClass}" id="${data.rowid}">
+      <td class="number number-${i}" id= "${data.numberid}">${i}.</td>
+      <td class="text text-${i}" id= "${data.textid}">${data.text}</td>
+      <td class="date date-${i}" id= "${data.dateid}">${data.date}</td>
       <td>
-      <button class="edit-btn" id= "edit-btn-${i}">Edit</button>
-      <button class="finished-btn" id= "finished-btn-${i}">Finished</button>
-      <button class="delete-btn" id= "delete-btn-${i}">Delete</button>
+      <button class="edit-btn edit-btn-${i}" id= "${data.editbuttonid}">Edit</button>
+      <button class="finished-btn finished-btn-${i}" id= "${data.finishedbuttonid}">Finished</button>
+      <button class="delete-btn delete-btn-${i}" id= "${data.deletebuttonid}">Delete</button>
       </td>
       </tr>
       `;
@@ -47,18 +47,19 @@ const renderData = (datas) => {
         console.log(true);
         templete += `
        
-        <tr class = "${rowClass}" id="row-${i}">
-        <td class="number" id= "number-${i}"><s>${i}.</s></td>
-        <td class="text" id= "text-${i}"><s>${data.text}</s></td>
-        <td class="date" id= "date-${i}"><s>${data.date}</s></td>
+        <tr class = "${rowClass}" id="${data}">
+        <td class="number number-${i}" "${data.numberid}"><s>${i}.</s></td>
+        <td class="text text-${i}" "${data.textid}"><s>${data.text}</s></td>
+        <td class="date date-${i}" "${data.dateid}"><s>${data.date}</s></td>
         <td>
-        <button class="edit-btn" id= "edit-btn-${i}">Edit</button>
-        <button class="finished-btn" id= "finished-btn-${i}">Finished</button>
-        <button class="delete-btn" id= "delete-btn-${i}">Delete</button>
+        <button class="edit-btn edit-btn-${i}" id= "${data.editbuttonid}">Edit</button>
+        <button class="finished-btn finished-btn-${i}" id= "${data.finishedbuttonid}">Finished</button>
+        <button class="delete-btn delete-btn-${i}" id= "${data.deletebuttonid}">Delete</button>
         </td>
         </tr>
+        
         `;
-          i++;
+        i++;
       }
     }
   }
@@ -80,6 +81,7 @@ addBtn.addEventListener("click", () => {
   textEl.value = "";
   dateEl.value = "";
   localStorageData = [];
+  window.location.reload();
 });
 
 /////// RETRIVE OR SAVE DATA
@@ -90,8 +92,20 @@ function dataArray(text, date) {
     localData = localData.concat(dataFromLocalStorage);
     console.log(localData);
   }
-  localData.push({ text: text, date: date, finished: false });
-
+  // localData.push({ text: text, date: date, finished: false });
+  let index = localData.length;
+  localData.push({
+    text: text,
+    date: date,
+    finished: false,
+    editbuttonid: `edit-btn-${index}`,
+    deletebuttonid: `delete-btn-${index}`,
+    finishedbuttonid: `finished-btn-${index}`,
+    numberid: `number-${index}`,
+    textid: `text-${index}`,
+    dateid: `date-${index}`,
+    rowid: `row-${index}`
+  });
   globalData = globalData.concat(localData);
   // console.log(globalData);
   localStorage.setItem("data", JSON.stringify(globalData));
@@ -110,55 +124,70 @@ clearBtn.addEventListener("dblclick", () => {
 const editBtn = document.querySelectorAll(".edit-btn");
 const finishedBtn = document.querySelectorAll(".finished-btn");
 const deleteBtn = document.querySelectorAll(".delete-btn");
-///////EDIT BUTTON EVENT LISTNER
+///////DELETE BUTTON EVENT LISTNER
 
 for (let btn of deleteBtn) {
   btn.addEventListener("click", (event) => {
-    console.log(event);
-    let index = parseInt(event.target.id.slice(11));
-    // console.log(index);
+    // console.log(event);
+    window.location.reload();
+    console.log(event.target.className);
+    console.log(event.target.className.length);
+    let index = parseInt(event.target.className.slice(22)) - 1;
+    console.log(index);
     let localStorageData = JSON.parse(localStorage.getItem("data"));
-    // console.log(localStorageData[index - 1]);
-    let deleteData = localStorageData.splice(index - 1, 1);
-    console.log(deleteData);
+    console.log(localStorageData[index]);
+    let deleteData = localStorageData.splice(index, 1);
+    // console.log(deleteData);
     localStorage.setItem("data", JSON.stringify(localStorageData));
     localStorageData = JSON.parse(localStorage.getItem("data"));
     console.log(localStorageData);
     renderData(localStorageData);
   });
 }
+// DONE AND WORKING
+///////FINISHED BUTTON EVENT LISTNER
 for (let btn of finishedBtn) {
   btn.addEventListener("click", (event) => {
-    let index = parseInt(event.target.id.slice(13));
-    let localStorageData = JSON.parse(localStorage.getItem("data"));
+    let localStorageData = JSON.parse(localStorage.getItem("data")); 
+   
+    let index = parseInt(event.target.className.slice(26));
+    // console.log(event.target.className.length);
+    if(!localStorageData[index - 1].finished){
     localStorageData[index - 1].finished = true;
     localStorage.setItem("data", JSON.stringify(localStorageData));
     console.log(index);
-    let numberEl = document.getElementById(`number-${index}`);
-    let textEl = document.getElementById(`text-${index}`);
-    let dateEl = document.getElementById(`date-${index}`);
+    let numberEl = document.querySelector(`.number-${index}`);
+    let textEl = document.querySelector(`.text-${index}`);
+    let dateEl = document.querySelector(`.date-${index}`);
+    // renderData(localStorageData);
     // console.log(typeof rowId);
     // console.log(tdEl);
     numberEl.style.textDecoration = "line-through";
     textEl.style.textDecoration = "line-through";
     dateEl.style.textDecoration = "line-through";
-  });
+  }});
 }
 
+///////EDIT BUTTON EVENT LISTNER
 for (let btn of editBtn) {
   btn.addEventListener("click", (event) => {
-    let index = parseInt(event.target.id.slice(9));
+  
+    let index = parseInt(event.target.className.slice(18));
+    console.log(event.target.className.length);
     let localStorageData = JSON.parse(localStorage.getItem("data"));
     textEl.value = localStorageData[index - 1].text;
-    dateEl.value =  localStorageData[index - 1].date;
+    dateEl.value = localStorageData[index - 1].date;
     localStorageData.splice(index - 1, 1);
     localStorage.setItem("data", JSON.stringify(localStorageData));
     console.log(localStorageData);
     renderData(localStorageData);
-    addBtn.addEventListener('click', () => {
-      dataArray(textEl.value, dateEl.value);
-      let localStorageData = JSON.parse(localStorage.getItem("data"));
-      renderData(localStorageData);
-    })
-  })
+    // addBtn.addEventListener("click", () => {
+    //   dataArray(textEl.value, dateEl.value);
+    //   let localStorageData = JSON.parse(localStorage.getItem("data"));
+    //   let datas = localStorageData; 
+    //   renderData(localStorageData);
+    // });
+  });
 }
+
+
